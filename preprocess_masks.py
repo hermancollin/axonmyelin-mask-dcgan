@@ -1,6 +1,7 @@
 """
 This script applies some basic preprocessing to the TEM masks to
-prepare the data for training
+prepare the data for training. Resizes masks to 2048x3370, then 
+crops 1024x1024 ROIs
 """
 
 from AxonDeepSeg import ads_utils
@@ -45,7 +46,7 @@ def main():
             tile6 = image[1024:, 2048:3072]
             tiles = [tile1, tile2, tile3, tile4, tile5, tile6]
             for tile in tiles:
-                fname = OUTPATH / Path(subj + '_' + str(sample_count))
+                fname = OUTPATH / Path(subj + '_' + str(sample_count)+ '.png')
                 sample_count += 1
                 ads_utils.imwrite(str(fname), tile)
     
