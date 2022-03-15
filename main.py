@@ -245,7 +245,7 @@ for epoch in range(num_epochs):
         if (iters % 100 == 0) or is_last_iter:
             with torch.no_grad():
                 fake = netG(fixed_z).detach().cpu()
-            vutils.save_image(fake, f'iter_{iters}.png', padding=2, normalize=True)
+            vutils.save_image(fake, f'{opt.outf}/iter_{iters}.png', padding=2, normalize=True)
             # img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
 
 	    # Save models
