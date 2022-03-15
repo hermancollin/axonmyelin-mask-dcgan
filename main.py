@@ -45,9 +45,10 @@ lr = 0.0002
 beta1 = 0.5
 ngpu = 1
 
-# data
+# data (by default, ImageFolder loads 3 channels so we need to transform to grayscale first)
 data = dset.ImageFolder(root=dataroot,
                         transform=transforms.Compose([
+                            transforms.Grayscale(),
                             transforms.Resize(image_size),
                             transforms.ToTensor(),
                             transforms.Normalize(0.5, 0.5),
@@ -148,8 +149,8 @@ class Discriminator(nn.Module):
             nn.Sigmoid()
         )
 
-        def forward(self, input):
-            return self.main(input)
+    def forward(self, input):
+        return self.main(input)
 
 # Instantiate discriminator
 netD = Discriminator(ngpu).to(device)
@@ -206,7 +207,7 @@ for epoch in range(num_epochs):
         errD_fake = criterion(output, label)
         errD_fake.backward()
         D_G_z1 = output.mean().item()
-        err_D = errD_real + errD_fake
+        errD = errD_real + errD_fake
 
         optimizerD.step()
 
@@ -239,6 +240,7 @@ for epoch in range(num_epochs):
         if (iters % 500 == 0) or is_last_iter:
             with torch.no_grad():
                 fake = netG(fixed_z).detach().cpu()
-            img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
+            vutils.save_image(fake, f'iter_{iters}.png', padding=2, normalize=True)
+            # img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
 
         iters += 1
