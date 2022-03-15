@@ -205,7 +205,7 @@ for epoch in range(num_epochs):
 
         # all-fake batch
         z = torch.randn(b_size, nz, 1, 1, device=device)
-        fake = netG(z)
+        fake = netG(z).detach()
         label.fill_(fake_label)
 
         output = netD(fake.detach()).view(-1)
@@ -223,7 +223,8 @@ for epoch in range(num_epochs):
         label.fill_(real_label)
 
         # additionnal forward pass in D because it was just updated
-        output = netD(fake).view(-1)
+        z = torch.randn(b_size, nz, 1, 1, device=device)
+        output = netD(netG(z)).view(-1)
         errG = criterion(output, label)
         errG.backward()
         D_G_z2 = output.mean().item()
