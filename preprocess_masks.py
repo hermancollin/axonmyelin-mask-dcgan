@@ -30,6 +30,8 @@ def main():
 
 
     os.makedirs(OUTPATH)
+    tile_size = 512
+
     for subj in subject_dict.keys():
         sample_count = 0
         deriv_path = DATAPATH / 'derivatives' / 'labels' / subj / 'micr'
@@ -38,13 +40,13 @@ def main():
             image = ads_utils.imread(str(m))
             # resizing smallest dimension from 2286 to 2048
             image = cv2.resize(image, dsize=(3370, 2048), interpolation=cv2.INTER_CUBIC)
-            tile1 = image[:1024, :1024]
-            tile2 = image[1024:, :1024]
-            tile3 = image[:1024, 1024:2048]
-            tile4 = image[1024:, 1024:2048]
-            tile5 = image[:1024, 2048:3072]
-            tile6 = image[1024:, 2048:3072]
-            tiles = [tile1, tile2, tile3, tile4, tile5, tile6]
+            n_xtiles = image.shape[0] // tile_size
+            n_ytiles = image.shape[1] // tile_size
+            tiles = []
+            for i in range(n_xtiles):
+                for j in range(n_ytiles):
+                    tile = image[i*tile_size:(i+1)*tile_size, j*tile_size:(j+1)*tile_size]
+                    tiles.append(tile)
             for tile in tiles:
                 fname = OUTPATH / Path(subj + '_' + str(sample_count)+ '.png')
                 sample_count += 1
