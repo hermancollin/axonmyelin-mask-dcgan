@@ -17,12 +17,17 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from IPython.display import HTML
 
-matplotlib.use('TkAgg')
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataroot', type=str, required=True, help='path to the training set')
+parser.add_argument('--lr', type=float, required=True, help='learning rate')
+parser.add_argument('--outf', type=str, required=True, help='folder to output images and models')
 
 opt = parser.parse_args()
+
+try:
+    os.makedirs(opt.outf)
+except OSErrors:
+    pass
 
 random.seed(42)
 torch.manual_seed(42)
@@ -40,8 +45,8 @@ nz = 100
 ngf = 64
 # number of feature maps in D
 ndf = 16
-num_epochs = 10
-lr = 0.0002
+num_epochs = 200
+lr = opt.lr
 beta1 = 0.5
 ngpu = 1
 
@@ -237,10 +242,15 @@ for epoch in range(num_epochs):
 
         # Apply G on fixed_z to see progress
         is_last_iter = (epoch == num_epochs-1) and (i == len(dataloader)-1)
-        if (iters % 500 == 0) or is_last_iter:
+        if (iters % 100 == 0) or is_last_iter:
             with torch.no_grad():
                 fake = netG(fixed_z).detach().cpu()
             vutils.save_image(fake, f'iter_{iters}.png', padding=2, normalize=True)
             # img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
+
+	    # Save models
+        if is_last_iter:
+	        torch.save(netG.state_dict(), '%s/netG_epoch_%d.pth' % (opt.outf, epoch))
+	        torch.save(netD.state_dict(), '%s/netD_epoch_%d.pth' % (opt.outf, epoch))
 
         iters += 1
