@@ -29,7 +29,6 @@ def main():
             subject_dict[subject] = []
         subject_dict[subject].append(sample)
 
-
     os.makedirs(OUTPATH)
     tile_size = 512
 

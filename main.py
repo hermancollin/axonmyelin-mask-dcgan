@@ -36,7 +36,7 @@ torch.manual_seed(42)
 dataroot = opt.dataroot
 workers = 2
 batch_size = 128
-image_size = 256
+image_size = 64
 # number of channels
 nc = 1
 # size of latent vector
@@ -44,7 +44,7 @@ nz = 100
 # number of feature maps in G
 ngf = 64
 # number of feature maps in D
-ndf = 16
+ndf = 64
 num_epochs = 200
 lr = opt.lr
 beta1 = 0.5
@@ -95,17 +95,9 @@ class Generator(nn.Module):
             nn.BatchNorm2d(ngf),
             nn.ReLU(True),
             # state size. (ngf) x 32 x 32
-            nn.ConvTranspose2d( ngf, ngf // 2, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ngf // 2), 
-            nn.ReLU(True),
-            # state size. (ngf/2) x 64 x 64
-            nn.ConvTranspose2d( ngf // 2, ngf // 4, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ngf // 4),
-            nn.ReLU(True),
-            # state size. (ngf/4) x 128 x 128
-            nn.ConvTranspose2d( ngf // 4, nc, 4, 2, 1, bias=False),
+            nn.ConvTranspose2d( ngf, nc, 4, 2, 1, bias=False),
             nn.Tanh()
-            # state size. (nc) x 256 x 256
+            # state size. (nc) x 64 x 64
         )
     
     def forward(self, input):
@@ -126,31 +118,23 @@ class Discriminator(nn.Module):
         super(Discriminator, self).__init__()
         self.ngpu = ngpu
         self.main = nn.Sequential(
-            # input is (nc) x 256 x 256
+            # input is (nc) x 64 x 64
             nn.Conv2d(nc, ndf, 4, 2, 1, bias=False),
             nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf) x 128 x 128
+            # state size. (ndf) x 32 x 32
             nn.Conv2d(ndf, ndf * 2, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ndf * 2),
             nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf*2) x 64 x 64
+            # state size. (ndf*2) x 16 x 16
             nn.Conv2d(ndf * 2, ndf * 4, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ndf * 4),
             nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf*4) x 32 x 32
+            # state size. (ndf*4) x 8 x 8
             nn.Conv2d(ndf * 4, ndf * 8, 4, 2, 1, bias=False),
             nn.BatchNorm2d(ndf * 8),
             nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf*8) x 16 x 16
-            nn.Conv2d(ndf * 8, ndf * 16, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 16),
-            nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf*16) x 8 x 8
-            nn.Conv2d(ndf * 16, ndf * 32, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(ndf * 32),
-            nn.LeakyReLU(0.2, inplace=True),
-            # state size. (ndf*32) x 4 x 4
-            nn.Conv2d(ndf * 32, 1, 4, 1, 0, bias=False),
+            # state size. (ndf*8) x 4 x 4
+            nn.Conv2d(ndf * 8, 1, 4, 1, 0, bias=False),
             nn.Sigmoid()
         )
 
