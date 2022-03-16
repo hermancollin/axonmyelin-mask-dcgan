@@ -21,6 +21,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--dataroot', type=str, required=True, help='path to the training set')
 parser.add_argument('--lr', type=float, required=True, help='learning rate')
 parser.add_argument('--outf', type=str, required=True, help='folder to output images and models')
+parser.add_argument('--netG', default=None, help='path to netG (to resume training)')
+parser.add_argument('--netD', default=None, help='path to netD (to resume training)')
 
 opt = parser.parse_args()
 
@@ -105,12 +107,12 @@ class Generator(nn.Module):
 
 # Instantiate generator
 netG = Generator(ngpu).to(device)
-
 # Handle multi-gpu if desired
 if (device.type == 'cuda') and (ngpu > 1):
     netG = nn.DataParallel(netG, list(range(ngpu)))
-
 netG.apply(weights_init)
+if opt.netG != None:
+    netG.load_state_dict(torch.load(opt.netG))
 print(netG)
 
 class Discriminator(nn.Module):
@@ -143,12 +145,12 @@ class Discriminator(nn.Module):
 
 # Instantiate discriminator
 netD = Discriminator(ngpu).to(device)
-
 # Handle multi-gpu if desired
 if (device.type == 'cuda') and (ngpu > 1):
     netD = nn.DataParallel(netD, list(range(ngpu)))
-
 netD.apply(weights_init)
+if opt.netD != None:
+    netD.load_state_dict(torch.load(opt.netD))
 print(netD)
 
 criterion = nn.BCELoss()
