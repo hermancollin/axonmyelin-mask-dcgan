@@ -16,6 +16,7 @@ import cv2
 
 DATAPATH = Path("/home/herman/Documents/NEUROPOLY_21/datasets/data_axondeepseg_tem")
 OUTPATH = Path("tem_masks") / 'masks'
+LOGFILE = 'near_empty_masks.txt'
 
 def main():
     samples_path = DATAPATH / 'samples.tsv'
@@ -51,6 +52,10 @@ def main():
                 fname = OUTPATH / Path(subj + '_' + str(sample_count)+ '.png')
                 sample_count += 1
                 ads_utils.imwrite(str(fname), tile)
+                # check for near-empty masks
+                if tile.mean() < 5:
+                    with open(LOGFILE, 'a') as log:
+                        log.write(str(fname)+'\n')
     
 
 if __name__ == '__main__':
